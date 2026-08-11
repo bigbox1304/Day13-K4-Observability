@@ -1,0 +1,8 @@
+CP1 baseline captured on 2026-08-11 before implementation.
+
+Total log records analyzed: 17
+Records with missing required fields: 14
+Records with missing enrichment (context): 14
+Unique correlation IDs found: 0
+Potential PII leaks detected: 0
+Estimated Score: 30/100

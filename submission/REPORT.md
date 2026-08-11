@@ -9,15 +9,15 @@
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`:
+- Điểm `validate_logs.py`: 100/100 trên 62 log records
 - Tổng số traces:
-- Số PII leak còn lại:
+- Số PII leak còn lại: 0
 - Link/đường dẫn dashboard:
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
-- Evidence PII redaction:
+- Evidence correlation ID: `submission/evidence/cp1-final-validator.txt`, `submission/evidence/cp1-test-results.txt`
+- Evidence PII redaction: `submission/evidence/cp1-final-validator.txt`, `submission/evidence/cp1-test-results.txt`
 - Evidence trace waterfall:
 - Giải thích một span đáng chú ý:
 

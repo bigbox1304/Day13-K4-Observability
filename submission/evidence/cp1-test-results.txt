@@ -1,0 +1,10 @@
+CP1 regression verification captured on 2026-08-11.
+
+Targeted CP1 tests:
+- Command: python -m pytest tests/test_cp1_logging.py tests/test_pii.py tests/test_chat_observability.py tests/test_validate_logs.py -q
+- Result: 11 passed
+
+Full public suite:
+- Command: python -m pytest -q
+- Result: 29 passed
+- Warnings: 2 FastAPI deprecation warnings for app.on_event("startup")
