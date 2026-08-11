@@ -1,19 +1,19 @@
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
+  - name: High latency
+    severity: warning
+    condition: response latency p95 > 3000 ms for 5 minutes
     type: symptom-based
-    owner: TODO
+    owner: platform-oncall
     runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
+  - name: Elevated error rate
+    severity: critical
+    condition: request error rate > 2% for 5 minutes
     type: symptom-based
-    owner: TODO
+    owner: platform-oncall
     runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
+  - name: Quality degradation
+    severity: warning
+    condition: quality proxy mean < 0.75 for 10 minutes
     type: symptom-based
-    owner: TODO
+    owner: ai-platform
     runbook: docs/alerts.md#alert-3

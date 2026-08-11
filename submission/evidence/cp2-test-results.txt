@@ -1,0 +1,7 @@
+Command: .venv\Scripts\python.exe -m pytest -q
+Result: 29 passed, 2 warnings in 3.08s
+
+Real API run:
+- Health returned ok=true and tracing_enabled=true.
+- 10/10 sample requests returned HTTP 200 with correlation IDs.
+- Langfuse traces were queried through the project API after ingestion.

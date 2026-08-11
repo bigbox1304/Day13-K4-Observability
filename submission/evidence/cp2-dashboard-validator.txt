@@ -1,0 +1,11 @@
+Command: .venv\Scripts\python.exe scripts\validate_dashboard.py
+Result: HỢP LỆ: 6/6 panel có trong dashboard contract.
+
+Runtime dashboard generated from the real data/logs.jsonl:
+- Records in the 60-minute window: 65
+- Latency: P50 150 ms; P95 1089 ms; P99 1108 ms
+- Traffic: 29 requests; 0.48 requests/minute
+- Errors: 0.00%; 0 failed requests
+- Cost: $0.055812
+- Tokens: 964 input; 3,528 output
+- Quality proxy mean: 0.864
