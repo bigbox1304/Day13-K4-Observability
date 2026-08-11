@@ -4,7 +4,7 @@
 
 - Tên nhóm: Cerberus
 - Repository URL: [https://github.com/bigbox1304/K4-DAY13-2A202601990.git](https://github.com/bigbox1304/K4-DAY13-2A202601990.git)
-- Commit SHA cuối:
+- Commit SHA cuối: Hoàn thành lab Day 13 - 2A202601990
 - Thành viên và vai trò:
   - Đỗ Phan Huy Hoàng — MSSV `2A202601990` — Role 1
   - Nguyễn Tuấn Vũ — MSSV `2A202601666` — Role 2
@@ -64,4 +64,4 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | ----------------- | --------- | ---------- | ----------- |
 | Đỗ Phan Huy Hoàng | Role 1    | .          |             |
 | Nguyễn Tuấn Vũ    | Role 2    | tuanvu-cp2 |             |
-| Lương Sỹ Linh     | Role 3    |            |             |
+| Lương Sỹ Linh     | Role 3    | sylinh-cp3 |             |
