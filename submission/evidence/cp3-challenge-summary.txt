@@ -1,0 +1,56 @@
+Checkpoint 3 — Bằng chứng challenge chính thức
+Ngày chạy: 2026-08-11
+
+Challenge
+- Challenge ID: day13-k4-observability-v1
+- Cohort: K4
+- Incident chính thức: rag_slow
+- Feature bị ảnh hưởng: monitoring
+- Latency threshold chính thức: 2000 ms
+- Số query chính thức: 5
+- API dùng trong lần chạy này: http://127.0.0.1:8001
+- Incident được bật trước official load test và được tắt sau khi thu thập evidence.
+
+Thực thi
+- Enable: python scripts/inject_incident.py
+- Workload: python scripts/load_test.py --challenge --concurrency 5
+- Disable: python scripts/inject_incident.py --disable
+- Cả 5 request đều trả về HTTP 200; không phát sinh event request_failed.
+
+Evidence từ metric — GET /metrics khi rag_slow đang bật
+- traffic: 5
+- latency_p50: 2651 ms
+- latency_p95: 3682 ms
+- latency_p99: 3682 ms
+- threshold chính thức: 2000 ms
+- error_breakdown: {}
+- quality_avg: 0.84
+- total_cost_usd: 0.0096
+
+Latency P95 (3682 ms) vượt threshold chính thức 2000 ms. Error rate vẫn ở 0%, vì vậy triệu chứng chính là tail latency tăng trên feature monitoring.
+
+Liên kết trace và log
+Langfuse API trả về một trace thật cho mỗi official session. Mỗi trace dùng prompt day13-chat, label production, version 1, source langfuse và có một GENERATION observation tên run.
+
+| session | trace_id | span được quan sát | trace latency | correlation_id | log line | response latency |
+|---|---|---|---:|---|---:|---:|
+| k4-challenge-s01 | e6becc0ae89faaf2702e826864d7726a | run / GENERATION | 3.685 s | req-595fdc46 | data/logs.jsonl:6 | 3682 ms |
+| k4-challenge-s02 | 4b62316fc734954fe630f18b3ef64cba | run / GENERATION | 2.652 s | req-d6030345 | data/logs.jsonl:12 | 2651 ms |
+| k4-challenge-s03 | 2976a3be7d8862850dad940437a2658d | run / GENERATION | 2.652 s | req-f7a08854 | data/logs.jsonl:10 | 2651 ms |
+| k4-challenge-s04 | b049b6a2c4bbeb3cf0fc5d335cf0e9af | run / GENERATION | 2.653 s | req-afbaeedf | data/logs.jsonl:14 | 2651 ms |
+| k4-challenge-s05 | 6f6b5ee15e10fcbbd95c1a023b73a361 | run / GENERATION | 2.653 s | req-30db8271 | data/logs.jsonl:8 | 2651 ms |
+
+Root cause
+- app/mock_rag.py tạo sleep 2.5 giây khi `STATE["rag_slow"]` là true.
+- app/agent.py bắt đầu đo latency trước `retrieve(message)` và ghi latency sau response từ LLM, nên delay của retrieval được tính vào `latency_ms`.
+- Trace span và các log `response_sent` tương ứng đều cho thấy duration tăng cao trong cả 5 official session.
+- Vì vậy root cause là slow RAG/retrieval path được inject, không phải LLM error hoặc request failure.
+
+Fix action
+- Tắt ngay path `rag_slow` được inject và khôi phục retrieval bình thường.
+- Trong production implementation, bỏ blocking delay và thêm retrieval timeout có giới hạn cùng fallback response hoặc circuit breaker.
+
+Preventive measure
+- Instrument retrieval thành trace span riêng và ghi retrieval duration/tool_name trong structured log.
+- Tạo alert khi latency P95 của monitoring-feature vượt threshold đã thống nhất trong một khoảng thời gian duy trì.
+- Thêm regression/load test để bảo đảm retrieval và end-to-end P95 thấp hơn challenge/SLO threshold.

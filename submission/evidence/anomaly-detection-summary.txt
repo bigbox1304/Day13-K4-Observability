@@ -1,0 +1,26 @@
+Bonus — Custom Automation phát hiện anomaly
+Ngày chạy: 2026-08-11
+
+Command:
+`.venv\Scripts\python.exe scripts\detect_anomalies.py --log data\logs.jsonl --window-minutes 0 --output submission\evidence\anomaly-report.json`
+
+Kết quả:
+- Records analyzed: 144
+- Requests: 55
+- Responses: 55
+- Failures: 0
+- Anomalies found: 1
+- Exit code: 1 khi có anomaly, phù hợp để dùng trong CI/automation.
+
+Anomaly được phát hiện:
+- Type: `latency_p95`
+- Severity: `warning`
+- Feature: `monitoring`
+- Observed P95: `3682 ms`
+- Threshold: `3000 ms`
+- Evidence log line: `data/logs.jsonl:6`
+- Correlation ID: `req-595fdc46`
+
+Automation cũng kiểm tra raw PII trong mọi JSON log record, error rate theo feature và quality mean theo feature. Lần chạy này không phát hiện PII leak, error anomaly hoặc quality anomaly.
+
+JSON report đầy đủ: `submission/evidence/anomaly-report.json`

@@ -5,6 +5,7 @@ import time
 from dataclasses import dataclass
 
 from .incidents import STATE
+from .runtime_config import snapshot as runtime_config_snapshot
 
 
 @dataclass
@@ -30,6 +31,9 @@ class FakeLLM:
         output_tokens = random.randint(80, 180)
         if STATE["cost_spike"]:
             output_tokens *= 4
+        runtime_config = runtime_config_snapshot()
+        if runtime_config["cost_optimization_enabled"]:
+            output_tokens = min(output_tokens, runtime_config["max_output_tokens"])
         answer = (
             "Starter answer. Teams should improve this output logic and add better quality checks. "
             "Use retrieved context and keep responses concise."

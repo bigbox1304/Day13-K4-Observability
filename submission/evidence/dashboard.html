@@ -1,5 +1,183 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Day 13 AI Observability Dashboard</title>
-<style>body{font-family:system-ui,sans-serif;background:#f5f7fb;color:#172033;margin:2rem}h1{margin-bottom:.25rem}.meta{color:#536174;margin-bottom:1.5rem}.grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:1rem}.panel{background:white;border:1px solid #d9e0ea;border-radius:10px;padding:1rem;box-shadow:0 2px 8px #17203312}h2{font-size:1rem;margin-top:0}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.4rem 0;border-bottom:1px solid #edf0f5}td{text-align:right;font-variant-numeric:tabular-nums}.threshold{font-size:.8rem;color:#536174;margin-bottom:0}@media(max-width:850px){.grid{grid-template-columns:1fr}}</style></head>
-<body><h1>Day 13 AI Observability</h1><div class="meta">Source: data/logs.jsonl · Records: 65 · Time range: 2026-08-11T07:33:24.899690+00:00 → 2026-08-11T08:33:24.899690+00:00 (60-minute window) · Refresh contract: 30 seconds</div>
-<div class="grid"><section class="panel"><h2>Latency percentiles</h2><table><tr><th>P50</th><td>150 ms</td></tr><tr><th>P95</th><td>1089 ms</td></tr><tr><th>P99</th><td>1108 ms</td></tr></table><p class="threshold">Threshold/SLO: p95 lte 3000</p></section><section class="panel"><h2>Request traffic</h2><table><tr><th>Requests</th><td>29</td></tr><tr><th>Rate</th><td>0.48 requests/min</td></tr></table><p class="threshold">Threshold/SLO: rate_per_minute gte 1</p></section><section class="panel"><h2>Error rate and breakdown</h2><table><tr><th>Error rate</th><td>0.00%</td></tr><tr><th>Failed requests</th><td>0</td></tr></table><p class="threshold">Threshold/SLO: error_rate_pct lte 2</p></section><section class="panel"><h2>Cost over time</h2><table><tr><th>Total</th><td>$0.055812</td></tr></table><p class="threshold">Threshold/SLO: total lte 2.5</p></section><section class="panel"><h2>Input and output tokens</h2><table><tr><th>Input</th><td>964</td></tr><tr><th>Output</th><td>3,528</td></tr></table><p class="threshold">Threshold/SLO: sum_by_field lte 50000</p></section><section class="panel"><h2>Quality proxy</h2><table><tr><th>Mean score</th><td>0.864</td></tr></table><p class="threshold">Threshold/SLO: mean gte 0.75</p></section></div></body></html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Day 13 · Observability cockpit</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --surface: rgba(15, 29, 49, .86);
+      --surface-strong: #10223a;
+      --line: rgba(167, 197, 232, .14);
+      --text: #edf5ff;
+      --muted: #8fa6c2;
+      --blue: #6da8ff;
+      --cyan: #54e0cf;
+      --green: #61dfad;
+      --amber: #ffc66d;
+      --red: #ff7d91;
+      --shadow: 0 22px 60px rgba(0, 0, 0, .25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(77, 142, 255, .22), transparent 32rem),
+        radial-gradient(circle at 92% 8%, rgba(43, 201, 185, .14), transparent 28rem),
+        var(--bg);
+    }
+    .shell { width: min(1240px, calc(100% - 48px)); margin: 0 auto; padding: 30px 0 44px; }
+    .topbar, .hero, .summary-grid, .grid { position: relative; z-index: 1; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .eyebrow {
+      margin: 0;
+      color: var(--blue);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid rgba(97, 223, 173, .28);
+      border-radius: 999px;
+      color: var(--green);
+      background: rgba(97, 223, 173, .09);
+      font-size: .76rem;
+      font-weight: 750;
+      letter-spacing: .04em;
+    }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 14px var(--green); }
+    .hero { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin: 42px 0 28px; }
+    h1 { margin: 0 0 10px; max-width: 760px; font-size: clamp(2.2rem, 5vw, 4.5rem); line-height: .98; letter-spacing: -.065em; }
+    .subtitle { max-width: 680px; margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.65; }
+    .hero-note { min-width: 190px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.035); color: var(--muted); font-size: .78rem; line-height: 1.6; }
+    .hero-note strong { display: block; color: var(--text); font-size: 1.35rem; letter-spacing: -.03em; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 24px; }
+    .meta-item { padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: rgba(255,255,255,.035); font-size: .74rem; }
+    .meta-item strong { color: var(--text); font-weight: 700; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .summary-card, .panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(20, 42, 70, .9), rgba(10, 24, 42, .9));
+      box-shadow: var(--shadow);
+    }
+    .summary-card { padding: 17px; border-radius: 16px; }
+    .summary-label { color: var(--muted); font-size: .73rem; font-weight: 700; letter-spacing: .03em; }
+    .summary-value { margin: 9px 0 5px; font-size: 1.55rem; font-weight: 800; letter-spacing: -.045em; }
+    .summary-value small, .primary-value small { color: var(--muted); font-size: .7em; font-weight: 650; }
+    .summary-note { color: var(--muted); font-size: .72rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .panel { position: relative; min-height: 260px; padding: 20px; border-radius: 20px; overflow: hidden; }
+    .panel::after { content: ""; position: absolute; width: 130px; height: 130px; top: -70px; right: -50px; border-radius: 50%; background: rgba(109, 168, 255, .11); filter: blur(2px); }
+    .panel-head { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .title-wrap { display: flex; gap: 11px; align-items: flex-start; }
+    .icon { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 10px; color: var(--cyan); background: rgba(84, 224, 207, .12); font-size: .72rem; font-weight: 900; }
+    .icon.blue { color: var(--blue); background: rgba(109, 168, 255, .13); }
+    .icon.amber { color: var(--amber); background: rgba(255, 198, 109, .13); }
+    h2 { margin: 1px 0 4px; font-size: .94rem; letter-spacing: -.015em; }
+    .panel-subtitle { margin: 0; color: var(--muted); font-size: .7rem; }
+    .chip { padding: 5px 8px; border-radius: 999px; font-size: .63rem; font-weight: 800; white-space: nowrap; }
+    .chip.good { color: var(--green); background: rgba(97, 223, 173, .11); }
+    .chip.warn { color: var(--amber); background: rgba(255, 198, 109, .11); }
+    .primary-value { position: relative; z-index: 1; margin: 25px 0 18px; font-size: 2.35rem; font-weight: 850; letter-spacing: -.065em; }
+    .metric-list { position: relative; z-index: 1; display: grid; gap: 10px; }
+    .metric-row { display: flex; justify-content: space-between; gap: 14px; padding-bottom: 9px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
+    .metric-row:last-child { border-bottom: 0; }
+    .metric-row strong { color: var(--text); font-weight: 750; text-align: right; }
+    .bar { position: relative; z-index: 1; height: 6px; margin: 17px 0 13px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .bar span { display: block; width: var(--progress); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+    .bar.warn span { background: linear-gradient(90deg, var(--amber), #ff9f6e); }
+    .threshold { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: .68rem; }
+    .threshold strong { color: #c4d5ea; font-weight: 700; text-align: right; }
+    .footer { position: relative; z-index: 1; margin-top: 22px; color: #7189a7; font-size: .7rem; line-height: 1.6; }
+    @media (max-width: 980px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 620px) { .shell { width: min(100% - 28px, 520px); padding-top: 22px; } .topbar { align-items: flex-start; flex-direction: column; } .summary-grid, .grid { grid-template-columns: 1fr; } h1 { font-size: 2.7rem; } .hero-note { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <p class="eyebrow">DAY 13 · AI OBSERVABILITY</p>
+      <div class="status">LIVE SNAPSHOT</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Observability cockpit</h1>
+        <p class="subtitle">Một góc nhìn tập trung cho latency, traffic, reliability, spend, tokens và quality của hệ thống.</p>
+      </div>
+      <div class="hero-note"><strong>6 nhóm chỉ số</strong>được kiểm tra theo dashboard contract và SLO hiện hành.</div>
+    </section>
+
+    <div class="meta-row">
+      <span class="meta-item">Nguồn <strong>data/logs.jsonl</strong></span>
+      <span class="meta-item"><strong>124</strong> records</span>
+      <span class="meta-item">Cửa sổ <strong>60 phút</strong></span>
+      <span class="meta-item">Refresh contract <strong>30 giây</strong></span>
+      <span class="meta-item">2026-08-11T09:16:17Z → 2026-08-11T10:16:17Z</span>
+    </div>
+
+    <section class="summary-grid" aria-label="Tổng quan SLO">
+      <article class="summary-card"><div class="summary-label">LATENCY P95</div><div class="summary-value">153 <small>ms</small></div><div class="summary-note">SLO ≤ 3000 ms · trong ngưỡng</div></article>
+      <article class="summary-card"><div class="summary-label">ERROR RATE</div><div class="summary-value">0.00 <small>%</small></div><div class="summary-note">0 request thất bại · ổn định</div></article>
+      <article class="summary-card"><div class="summary-label">TOTAL COST</div><div class="summary-value">$0.244170</div><div class="summary-note">Cửa sổ 60 phút</div></article>
+      <article class="summary-card"><div class="summary-label">QUALITY PROXY</div><div class="summary-value">0.880</div><div class="summary-note">SLO ≥ 0.75 · trong ngưỡng</div></article>
+    </section>
+
+    <section class="grid" aria-label="Chi tiết sáu nhóm chỉ số">
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon blue">L</span><div><h2>Phân vị độ trễ</h2><p class="panel-subtitle">Latency percentiles</p></div></div><span class="chip good">TRONG SLO</span></div>
+        <div class="primary-value">153 <small>ms P95</small></div>
+        <div class="metric-list"><div class="metric-row"><span>P50</span><strong>150 ms</strong></div><div class="metric-row"><span>P99</span><strong>1238 ms</strong></div></div>
+        <div class="bar" style="--progress:5%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>p95 ≤ 3000 ms</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon blue">T</span><div><h2>Lưu lượng request</h2><p class="panel-subtitle">Request traffic</p></div></div><span class="chip warn">DƯỚI TARGET</span></div>
+        <div class="primary-value">50 <small>requests</small></div>
+        <div class="metric-list"><div class="metric-row"><span>Tốc độ</span><strong>0.83 request/phút</strong></div><div class="metric-row"><span>Cửa sổ</span><strong>60 phút</strong></div></div>
+        <div class="bar warn" style="--progress:83%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>rate ≥ 1 request/phút</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon">E</span><div><h2>Tỷ lệ lỗi</h2><p class="panel-subtitle">Error rate and breakdown</p></div></div><span class="chip good">ỔN ĐỊNH</span></div>
+        <div class="primary-value">0.00 <small>%</small></div>
+        <div class="metric-list"><div class="metric-row"><span>Request thất bại</span><strong>0</strong></div><div class="metric-row"><span>Error breakdown</span><strong>Không có</strong></div></div>
+        <div class="bar" style="--progress:2%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>error rate ≤ 2%</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon amber">$</span><div><h2>Chi phí theo thời gian</h2><p class="panel-subtitle">Cost over time</p></div></div><span class="chip good">TRONG NGƯỠNG</span></div>
+        <div class="primary-value">$0.244170</div>
+        <div class="metric-list"><div class="metric-row"><span>Tổng cửa sổ</span><strong>$0.244170</strong></div><div class="metric-row"><span>Requests</span><strong>50</strong></div></div>
+        <div class="bar" style="--progress:10%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>total ≤ $2.50</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon blue">TK</span><div><h2>Token đầu vào / đầu ra</h2><p class="panel-subtitle">Input and output tokens</p></div></div><span class="chip good">TRONG NGƯỠNG</span></div>
+        <div class="primary-value">17,598 <small>tokens</small></div>
+        <div class="metric-list"><div class="metric-row"><span>Input</span><strong>1,650</strong></div><div class="metric-row"><span>Output</span><strong>15,948</strong></div></div>
+        <div class="bar" style="--progress:35%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>sum ≤ 50,000</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="title-wrap"><span class="icon">Q</span><div><h2>Quality proxy</h2><p class="panel-subtitle">Mean quality score</p></div></div><span class="chip good">TRONG SLO</span></div>
+        <div class="primary-value">0.880</div>
+        <div class="metric-list"><div class="metric-row"><span>Điểm trung bình</span><strong>0.880</strong></div><div class="metric-row"><span>Target tối thiểu</span><strong>0.750</strong></div></div>
+        <div class="bar" style="--progress:88%"><span></span></div><div class="threshold"><span>Ngưỡng / SLO</span><strong>mean ≥ 0.75</strong></div>
+      </section>
+    </section>
+
+    <p class="footer">Snapshot được dựng từ <strong>data/logs.jsonl</strong>. Các ngưỡng theo <strong>config/dashboard.yaml</strong> và <strong>config/slo.yaml</strong>; refresh contract: 30 giây.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+Bonus — Audit Log riêng
+Ngày chạy: 2026-08-11
+
+Đường dẫn audit log: `data/audit.jsonl`
+Audit log được ghi riêng, không trộn vào `data/logs.jsonl`.
+
+Các event đã ghi nhận:
+- `incident_enabled`: 4 record
+- `incident_disabled`: 2 record
+- `config_changed`: 6 record
+- Tổng cộng: 12 record
+
+Các correlation ID dùng để kiểm tra:
+- data/audit.jsonl:1 — `incident_enabled` — `req-371d4d5f`
+- data/audit.jsonl:2 — `config_changed` — `req-77d9ba16`
+- data/audit.jsonl:3 — `incident_disabled` — `req-45c7fff5`
+- data/audit.jsonl:4 — `config_changed` — `req-4d0ec370`
+- data/audit.jsonl:5 — `config_changed` — `req-87503a86`
+- data/audit.jsonl:6 — `incident_enabled` — `req-bdfa9947`
+- data/audit.jsonl:7 — `incident_disabled` — `req-bc68d712`
+- data/audit.jsonl:8 — `config_changed` — `req-39198663`
+- data/audit.jsonl:9 — `config_changed` — `req-277c08bd`
+- data/audit.jsonl:10 — `incident_enabled` — `req-cd62e1e5`
+- data/audit.jsonl:11 — `config_changed` — `req-b0342a96`
+- data/audit.jsonl:12 — `incident_enabled` — `req-2342d134`
+
+Audit record có `ts`, `level`, `service=audit`, `event`, `correlation_id`, `actor` và `payload`.
+Payload cũng đi qua PII scrubbing trước khi ghi file.

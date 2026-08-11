@@ -1,0 +1,8 @@
+{"actor":"system","correlation_id":"req-371d4d5f","event":"incident_enabled","level":"info","payload":{"name":"cost_spike"},"service":"audit","ts":"2026-08-11T09:53:56.065905+00:00"}
+{"actor":"system","correlation_id":"req-77d9ba16","event":"config_changed","level":"info","payload":{"cost_optimization_enabled":true,"max_output_tokens":180,"setting":"cost_optimization"},"service":"audit","ts":"2026-08-11T09:54:16.673543+00:00"}
+{"actor":"system","correlation_id":"req-45c7fff5","event":"incident_disabled","level":"info","payload":{"name":"cost_spike"},"service":"audit","ts":"2026-08-11T09:54:42.510637+00:00"}
+{"actor":"system","correlation_id":"req-4d0ec370","event":"config_changed","level":"info","payload":{"cost_optimization_enabled":false,"max_output_tokens":180,"setting":"cost_optimization"},"service":"audit","ts":"2026-08-11T09:54:42.523285+00:00"}
+{"actor":"system","correlation_id":"req-87503a86","event":"config_changed","level":"info","payload":{"cost_optimization_enabled":true,"max_output_tokens":180,"setting":"cost_optimization"},"service":"audit","ts":"2026-08-11T09:55:09.897819+00:00"}
+{"actor":"system","correlation_id":"req-bdfa9947","event":"incident_enabled","level":"info","payload":{"name":"cost_spike"},"service":"audit","ts":"2026-08-11T09:55:09.912167+00:00"}
+{"actor":"system","correlation_id":"req-bc68d712","event":"incident_disabled","level":"info","payload":{"name":"cost_spike"},"service":"audit","ts":"2026-08-11T09:56:06.277952+00:00"}
+{"actor":"system","correlation_id":"req-39198663","event":"config_changed","level":"info","payload":{"cost_optimization_enabled":false,"max_output_tokens":180,"setting":"cost_optimization"},"service":"audit","ts":"2026-08-11T09:56:06.290994+00:00"}

@@ -1,10 +1,10 @@
-CP1 regression verification captured on 2026-08-11.
+Đã ghi nhận kiểm tra regression CP1 vào ngày 2026-08-11.
 
-Targeted CP1 tests:
+Test CP1 mục tiêu:
 - Command: python -m pytest tests/test_cp1_logging.py tests/test_pii.py tests/test_chat_observability.py tests/test_validate_logs.py -q
-- Result: 11 passed
+- Kết quả: 11 passed
 
-Full public suite:
+Bộ public test đầy đủ:
 - Command: python -m pytest -q
-- Result: 29 passed
-- Warnings: 2 FastAPI deprecation warnings for app.on_event("startup")
+- Kết quả mới nhất: 32 passed
+- Warnings: 2 cảnh báo FastAPI deprecation cho `app.on_event("startup")`

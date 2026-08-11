@@ -23,6 +23,11 @@ class ChatResponse(BaseModel):
     quality_score: float
 
 
+class CostOptimizationRequest(BaseModel):
+    enabled: bool
+    max_output_tokens: int | None = Field(default=None, ge=1, le=4096)
+
+
 class LogRecord(BaseModel):
     ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     level: Literal["info", "warning", "error", "critical"]

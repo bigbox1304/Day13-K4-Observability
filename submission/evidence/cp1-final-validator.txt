@@ -1,37 +1,37 @@
-CP1 final validation rechecked on 2026-08-11.
+Đã kiểm tra lại CP1 vào ngày 2026-08-11.
 
-Runtime conditions:
+Điều kiện runtime:
 - Local API: http://127.0.0.1:8001
-- Langfuse disabled for the local PII probe
-- Full runtime batch: 12 successful, 0 failed
-- Unique request correlation IDs in the full runtime batch: 12
-- Client-provided `req-deadbeef` matched the response body and `x-request-id` header
-- `x-response-time-ms` was present and numeric
-- Separate PII probes: 5 successful, 0 failed
+- Langfuse được tắt trong PII probe cục bộ
+- Batch runtime đầy đủ: 12 thành công, 0 thất bại
+- Số request correlation ID duy nhất trong batch runtime: 12
+- `req-deadbeef` do client cung cấp khớp với response body và header `x-request-id`
+- `x-response-time-ms` tồn tại và có giá trị dạng số
+- PII probe riêng: 5 thành công, 0 thất bại
 
-Validator result:
-- Total log records analyzed: 62
-- Records with missing required fields: 0
-- Records with missing enrichment (context): 0
-- Unique correlation IDs found: 29
-- Potential PII leaks detected: 0
+Kết quả validator:
+- Tổng số log record được phân tích: 144
+- Record thiếu trường bắt buộc: 0
+- Record thiếu enrichment (context): 0
+- Số correlation ID duy nhất: 70
+- Số nguy cơ PII leak phát hiện: 0
 - Basic JSON schema: PASSED
 - Correlation ID propagation: PASSED
 - Log enrichment: PASSED
 - PII scrubbing: PASSED
-- Estimated Score: 100/100
+- Điểm ước tính: 100/100
 
-Linked-log spot check:
+Kiểm tra nhanh log đã liên kết:
 - Correlation ID: req-ae0b6810
-- Events: request_received, response_sent
-- Linked records: 2
-- Required request context complete: true
-- Raw controlled PII found: false
+- Event: request_received, response_sent
+- Số record liên kết: 2
+- Request context bắt buộc đầy đủ: true
+- Không tìm thấy PII kiểm soát dạng raw: false
 
-Runtime PII marker check:
-- REDACTED_EMAIL: present
-- REDACTED_PHONE_VN: present
-- REDACTED_CCCD: present
-- REDACTED_CREDIT_CARD: present
-- REDACTED_PASSPORT_VN: present
-- Raw controlled PII: absent
+Kiểm tra marker PII runtime:
+- REDACTED_EMAIL: có
+- REDACTED_PHONE_VN: có
+- REDACTED_CCCD: có
+- REDACTED_CREDIT_CARD: có
+- REDACTED_PASSPORT_VN: có
+- PII kiểm soát dạng raw: không có

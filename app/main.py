@@ -7,12 +7,14 @@ from fastapi.responses import JSONResponse
 from structlog.contextvars import bind_contextvars
 
 from .agent import LabAgent
+from .audit import write_audit_event
 from .incidents import disable, enable, status
 from .logging_config import configure_logging, get_logger
 from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
-from .schemas import ChatRequest, ChatResponse
+from .runtime_config import set_cost_optimization, snapshot as runtime_config_snapshot
+from .schemas import ChatRequest, ChatResponse, CostOptimizationRequest
 from .tracing import tracing_enabled
 
 configure_logging()
@@ -35,7 +37,12 @@ async def startup() -> None:
 
 @app.get("/health")
 async def health() -> dict:
-    return {"ok": True, "tracing_enabled": tracing_enabled(), "incidents": status()}
+    return {
+        "ok": True,
+        "tracing_enabled": tracing_enabled(),
+        "incidents": status(),
+        "runtime_config": runtime_config_snapshot(),
+    }
 
 
 @app.get("/metrics")
@@ -97,9 +104,14 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 
 
 @app.post("/incidents/{name}/enable")
-async def enable_incident(name: str) -> JSONResponse:
+async def enable_incident(request: Request, name: str) -> JSONResponse:
     try:
         enable(name)
+        write_audit_event(
+            "incident_enabled",
+            correlation_id=request.state.correlation_id,
+            payload={"name": name},
+        )
         log.warning("incident_enabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
@@ -107,10 +119,41 @@ async def enable_incident(name: str) -> JSONResponse:
 
 
 @app.post("/incidents/{name}/disable")
-async def disable_incident(name: str) -> JSONResponse:
+async def disable_incident(request: Request, name: str) -> JSONResponse:
     try:
         disable(name)
+        write_audit_event(
+            "incident_disabled",
+            correlation_id=request.state.correlation_id,
+            payload={"name": name},
+        )
         log.warning("incident_disabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/config/cost-optimization")
+async def get_cost_optimization() -> dict:
+    return {"ok": True, "cost_optimization": runtime_config_snapshot()}
+
+
+@app.post("/config/cost-optimization")
+async def update_cost_optimization(
+    request: Request, body: CostOptimizationRequest
+) -> JSONResponse:
+    try:
+        config = set_cost_optimization(
+            enabled=body.enabled,
+            max_output_tokens=body.max_output_tokens,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    write_audit_event(
+        "config_changed",
+        correlation_id=request.state.correlation_id,
+        payload={"setting": "cost_optimization", **config},
+    )
+    log.info("config_changed", service="control", payload={"setting": "cost_optimization", **config})
+    return JSONResponse({"ok": True, "cost_optimization": config})

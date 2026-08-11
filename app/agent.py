@@ -8,6 +8,7 @@ from .mock_llm import FakeLLM
 from .mock_rag import retrieve
 from .pii import hash_user_id, summarize_text
 from .prompt_management import resolve_prompt
+from .runtime_config import snapshot as runtime_config_snapshot
 from .tracing import get_langfuse_client, observe, tracing_enabled
 
 
@@ -39,6 +40,7 @@ class LabAgent:
             enabled=tracing_enabled(),
         )
         response = self.llm.generate(prompt.text)
+        runtime_config = runtime_config_snapshot()
         quality_score = self._heuristic_quality(message, response.text, docs)
         latency_ms = int((time.perf_counter() - started) * 1000)
         cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
@@ -64,6 +66,8 @@ class LabAgent:
                 "prompt_version": prompt.version,
                 "prompt_source": prompt.source,
                 "prompt_fetch_error": prompt.fetch_error,
+                "cost_optimization_enabled": runtime_config["cost_optimization_enabled"],
+                "max_output_tokens": runtime_config["max_output_tokens"],
             },
             usage_details={
                 "prompt_tokens": response.usage.input_tokens,

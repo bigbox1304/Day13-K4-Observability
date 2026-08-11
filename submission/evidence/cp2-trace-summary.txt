@@ -1,10 +1,10 @@
-Source: Langfuse Cloud API, queried after real API requests. No mock traces were created.
+Nguồn: Langfuse Cloud API, query sau các request API thật. Không tạo mock trace.
 Prompt: day13-chat
-Final production label after rollback: version 1
+Production label cuối cùng sau rollback: version 1
 
 trace_id=9f18b27111b2ed7c4e5ba5d741950674 session=cp2-baseline label=baseline version=1 source=langfuse
 trace_id=7a07cd53d084e6164c284da053efb088 session=cp2-candidate label=candidate version=2 source=langfuse
 trace_id=b2b7149ce9fa6fbb6465bdc4a0f55755 session=cp2-production-v2 label=production version=2 source=langfuse
 trace_id=f6015a0df36c9cb58b64a2d0bceff17a session=cp2-production-v1 label=production version=1 source=langfuse
 
-The production label was moved to version 2, one real request was sent, then production was rolled back to version 1 and another real request was sent.
+Production label được chuyển sang version 2, chạy một request thật, sau đó rollback về version 1 và chạy thêm một request thật.

@@ -1,0 +1,45 @@
+Bonus — Cost Optimization before/after
+Ngày chạy: 2026-08-11
+
+Giải pháp đã triển khai
+- Thêm runtime config `cost_optimization_enabled`.
+- Khi bật optimization, `FakeLLM` giới hạn output ở `max_output_tokens=180`.
+- Có thể bật qua API:
+  `POST /config/cost-optimization` với body `{"enabled":true,"max_output_tokens":180}`.
+- `cost_spike` vẫn được bật trong cả hai lần chạy để so sánh cùng một tình huống.
+
+Workload giống nhau
+- 10 sample query từ `data/sample_queries.jsonl`.
+- `concurrency=5`.
+- API: http://127.0.0.1:8001
+
+Before — cost optimization tắt
+- Incident: `cost_spike` enabled
+- `cost_optimization_enabled`: false
+- `traffic`: 10
+- `tokens_out_total`: 5,176
+- `avg_cost_usd`: 0.0079
+- `total_cost_usd`: 0.0786
+- `latency_p95`: 150 ms
+
+After — giới hạn output token
+- Server được khởi động lại để metrics bắt đầu từ 0.
+- `cost_optimization_enabled`: true
+- `max_output_tokens`: 180
+- Incident: `cost_spike` enabled
+- `traffic`: 10
+- `tokens_out_total`: 1,800
+- `avg_cost_usd`: 0.0028
+- `total_cost_usd`: 0.0280
+- `latency_p95`: 150 ms
+
+Kết quả
+- Cost giảm: `(0.0786 - 0.0280) / 0.0786 = 64.4%`.
+- Output tokens giảm: `5,176 → 1,800`.
+- Cả hai lần chạy đều có 10/10 request HTTP 200.
+- Quality proxy trung bình giữ ở `0.88` trong cả hai lần chạy.
+
+Evidence runtime bổ sung
+- Audit ghi nhận config change và incident enable/disable trong `data/audit.jsonl`.
+- Screenshot before: `submission/evidence/cost-optimization-before.png`.
+- Screenshot after: `submission/evidence/cost-optimization-after.png`.
